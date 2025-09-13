@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+import subprocess
+import sys
+import os
+import shlex
+
+APPS_DIR = "/Applications"
+
+def run_command(cmd):
+    """Run a shell command and return its output as a string."""
+    try:
+        return subprocess.check_output(shlex.split(cmd), stderr=subprocess.DEVNULL).decode().strip()
+    except subprocess.CalledProcessError:
+        return ""
+
+def check_app(app_name):
+    """Check if an app is available on Homebrew Cask."""
+    result = run_command(f"brew search --casks {shlex.quote(app_name)}")
+    if app_name.lower() in result.lower():
+        print(f"✅ '{app_name}' is available on Homebrew Cask")
+    else:
+        print(f"❌ '{app_name}' is not found on Homebrew Cask")
+
+def list_apps():
+    """List installed apps in /Applications that are available via Homebrew Cask."""
+    print(f"Scanning {APPS_DIR} for apps available on Homebrew...\n")
+    for entry in os.listdir(APPS_DIR):
+        if entry.endswith(".app"):
+            app_name = os.path.splitext(entry)[0]
+            result = run_command(f"brew search --casks {shlex.quote(app_name)}")
+            if app_name.lower() in result.lower():
+                print(f"✅ {app_name}")
+
+def adopt_app(app_name):
+    """Delete an existing app and reinstall it via Homebrew."""
+    app_path = os.path.join(APPS_DIR, f"{app_name}.app")
+    if os.path.exists(app_path):
+        print(f"🗑 Removing existing app at {app_path}...")
+        subprocess.run(["rm", "-rf", app_path])
+
+    print(f"📦 Installing '{app_name}' via Homebrew...")
+    subprocess.run(["brew", "install", "--cask", app_name])
+
+def show_help():
+    print("Usage:")
+    print("  caskmate check <appname>     - Check if an app is available on Homebrew Cask")
+    print("  caskmate list                - List installed apps that are available on Homebrew")
+    print("  caskmate adopt <appname>     - Delete the existing app and reinstall via Homebrew")
+    print("  caskmate migrate <appname>   - Same as adopt (delete first, then reinstall)")
+    print()
+    print("⚠️  Warning: adopt/migrate will permanently remove the existing app from /Applications before reinstalling.")
+
+def main():
+    if len(sys.argv) < 2:
+        show_help()
+        sys.exit(0)
+
+    command = sys.argv[1].lower()
+
+    if command == "check" and len(sys.argv) == 3:
+        check_app(sys.argv[2])
+    elif command == "list":
+        list_apps()
+    elif command in ("adopt", "migrate") and len(sys.argv) == 3:
+        adopt_app(sys.argv[2])
+    else:
+        show_help()
+
+if __name__ == "__main__":
+    main()
