@@ -1,8 +1,8 @@
 class Caskmate < Formula
   desc "CLI tool to manage apps in /Applications via Homebrew"
   homepage "https://github.com/giovannirizzello/caskmate"
-  url "https://github.com/giovannirizzello/caskmate/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "9bf14f0d5f7d51f186b761dbd70ea7dfc2797fbb542364564451b3f75d97249f"
+  url "https://github.com/giovannirizzello/caskmate/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "35fbc80c5eb8acc5830b9814218d949c551e908369bf8815fbcbdf3ef541357a"
   license "MIT"
 
   depends_on "python@3.11"
